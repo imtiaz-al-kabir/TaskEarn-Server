@@ -1,0 +1,11 @@
+# Copy to .env and fill in values
+
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxx@your-project.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+SENDGRID_API_KEY=SG.xxx
+SENDGRID_FROM_EMAIL=noreply@yourdomain.com
+
+

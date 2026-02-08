@@ -18,8 +18,10 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://task-earn-pro.web.app", // Added common platform domains
-      "https://task-earn-pro.firebaseapp.com",
+      "https://micro-task-project.web.app",
+      "https://micro-task-project.firebaseapp.com",
+      "https://career-portal-ph.web.app",
+      "https://career-portal-ph.firebaseapp.com",
     ],
     credentials: true,
   })
@@ -33,6 +35,25 @@ const cookieOptions = {
   sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
 };
 
+app.get('/', (req, res) => {
+  res.send('Micro Task Server is running! 🚀');
+});
+
+app.get('/api/health', (req, res) => res.json({
+  ok: true,
+  env: process.env.NODE_ENV,
+  vercel: !!process.env.VERCEL
+}));
+
+app.get('/api/debug-vars', (req, res) => {
+  res.json({
+    hasMongo: !!process.env.MONGODB_URI,
+    hasFirebaseKey: !!process.env.FB_SERVICE_KEY,
+    hasStripe: !!process.env.STRIPE_SECRET_KEY,
+    hasImgBB: !!process.env.IMGBB_API_KEY
+  });
+});
+
 // Lazy DB Connection Middleware
 app.use(async (req, res, next) => {
   try {
@@ -40,12 +61,9 @@ app.use(async (req, res, next) => {
     next();
   } catch (err) {
     console.error('Database connection middleware error:', err.message);
-    if (req.path === '/api/health') {
-      return res.json({ ok: false, db: false, error: err.message });
-    }
     res.status(503).json({
       message: 'Service Unavailable: Database connection failed.',
-      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+      error: err.message
     });
   }
 });
@@ -59,11 +77,11 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/reports', reportRoutes);
 
-app.get('/api/health', (req, res) => res.json({ ok: true, db: !!getDB() }));
+app.get('/api/db-status', (req, res) => res.json({ connected: !!getDB() }));
 
 // Export app for serverless deployment
-export { app };
+export default app;
 
-if (process.env.NODE_ENV !== 'production' || (!process.env.NETLIFY && !process.env.VERCEL)) {
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
